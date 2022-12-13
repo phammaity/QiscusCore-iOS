@@ -251,6 +251,7 @@ public class CommentDB {
     /// Requirement said, we asume when receive comment from opponent then old my comment status is read
     public func markCommentAsRead(comment: CommentModel) {
         if comment.status == .deleted { return }
+        if !comment.isQiscustype() || comment.type == CommentType.systemEvent.rawValue { return }
         guard let user = QiscusCore.getProfile() else { return }
         // check comment from opponent
         guard let comments = QiscusCore.database.comment.find(roomId: comment.roomId) else { return }
@@ -259,8 +260,10 @@ public class CommentDB {
         for c in myCommentBefore {
             // update comment
             if c.status.intValue < comment.status.intValue {
-                c.status = .read
-                QiscusCore.database.comment.save([c])
+                if c.status.intValue != CommentStatus.failed.intValue {
+                    c.status = .read
+                    QiscusCore.database.comment.save([c])
+                }
             }
         }
     }

@@ -74,20 +74,24 @@ class QiscusEventManager {
                     // publish event new comment inside room
                     roomDelegate?.onMessageReceived(message: comment)
                 }
-                
-                if let comments = QiscusCore.database.comment.find(roomId: comment.roomId) {
-                    
-                    guard let user = QiscusCore.getProfile() else { return }
-                    if comment.userEmail != user.email{
-                        var mycomments = comments.filter({ $0.userEmail == user.email }) // filter my comment
-                        mycomments = mycomments.filter({ $0.status == .sent || $0.status == .delivered })
+                if !comment.isQiscustype() || comment.type == CommentType.systemEvent.rawValue {
+                    QiscusCore.database.comment.save([comment])
+                    QiscusCore.eventManager.gotMessageStatus(comment: comment)
+                } else {
+                    if let comments = QiscusCore.database.comment.find(roomId: comment.roomId) {
                         
-                        mycomments.forEach { (c) in
-                            let new = c
-                            // update comment
-                            new.status = .read
-                            QiscusCore.database.comment.save([new])
-                            QiscusCore.eventManager.gotMessageStatus(comment: new)
+                        guard let user = QiscusCore.getProfile() else { return }
+                        if comment.userEmail != user.email{
+                            var mycomments = comments.filter({ $0.userEmail == user.email }) // filter my comment
+                            mycomments = mycomments.filter({ $0.status == .sent || $0.status == .delivered })
+                            
+                            mycomments.forEach { (c) in
+                                let new = c
+                                // update comment
+                                new.status = .read
+                                QiscusCore.database.comment.save([new])
+                                QiscusCore.eventManager.gotMessageStatus(comment: new)
+                            }
                         }
                     }
                 }

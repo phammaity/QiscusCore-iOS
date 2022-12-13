@@ -537,9 +537,11 @@ class RealtimeManager {
                             if c.status.intValue < status.intValue {
                                 let new = c
                                 // update comment
-                                new.status = status
-                                QiscusCore.database.comment.save([new])
-                                QiscusCore.eventManager.gotMessageStatus(comment: new) // patch hard update
+                                if c.status.intValue != CommentStatus.failed.intValue {
+                                    new.status = status
+                                    QiscusCore.database.comment.save([new])
+                                    QiscusCore.eventManager.gotMessageStatus(comment: new) // patch hard update
+                                }
                             }
                             
                         }
@@ -669,9 +671,11 @@ class RealtimeManager {
                                     if c.status.intValue < status.intValue {
                                         let new = c
                                         // update comment
-                                        new.status = .read
-                                        QiscusCore.database.comment.save([new])
-                                        QiscusCore.eventManager.gotMessageStatus(comment: new)
+                                        if c.status.intValue != CommentStatus.failed.intValue {
+                                            new.status = .read
+                                            QiscusCore.database.comment.save([new])
+                                            QiscusCore.eventManager.gotMessageStatus(comment: new)
+                                        }
                                     }
                                     
                                 }
@@ -685,9 +689,11 @@ class RealtimeManager {
                                     if c.status.intValue < status.intValue {
                                         let new = c
                                         // update comment
-                                        new.status = .delivered
-                                        QiscusCore.database.comment.save([new])
-                                        QiscusCore.eventManager.gotMessageStatus(comment: new)
+                                        if c.status.intValue != CommentStatus.failed.intValue {
+                                            new.status = .delivered
+                                            QiscusCore.database.comment.save([new])
+                                            QiscusCore.eventManager.gotMessageStatus(comment: new)
+                                        }
                                     }
                                     
                                 }
